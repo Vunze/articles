@@ -6,6 +6,7 @@ const articleSchema = mongoose.Schema({
     title: String,
     comment: String,
     conference: String,
+    author: String,
 })
 
 const articlePost = mongoose.model("Article", articleSchema)

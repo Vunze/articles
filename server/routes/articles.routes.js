@@ -1,11 +1,11 @@
 const express = require('express')
 const router = express.Router()
 
-const {getAllArticles, updateSingleArticle, removeSingleArticle} = require("../controllers/articles.controller")
+const {getAllArticles, findArticle, findByConference} = require("../controllers/articles.controller")
 
 router.get('/', getAllArticles);
-router.patch("/:id", updateSingleArticle);
-router.delete("/:id", removeSingleArticle);
+router.get("/:id", findArticle);
+router.get("/conf", findByConference);
 
 
-module.exports = router
+module.exports = router;
