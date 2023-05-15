@@ -5,6 +5,7 @@ from pymongo import MongoClient
 class Article:
     def __init__(self, arxiv, conf):
         self.id = arxiv.entry_id
+        self.summary = arxiv.summary
         self.published = arxiv.published
         self.title = arxiv.title
         self.comment = arxiv.comment

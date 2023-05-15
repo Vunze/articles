@@ -11,104 +11,88 @@ import formatDate from '../context/formatDate';
 import DropdownMenu from 'react-bootstrap/esm/DropdownMenu';
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import ToggleButton from "react-bootstrap/ToggleButton";
+import { components } from "react-select";
+import { confs } from "../confs.js";
+import { default as ReactSelect } from "react-select";
 
 
 const Home = () => {
     const [articles, setArticles] = useState([]);
     const [sort, setSort] = useState("published");
-    const [sortOrder, setSortOrder] = useState("desc");
-    const [confs, setConfs] = useState([]);
+    const [sortOrder, setSortOrder] = useState("Newest");
+    const [optionSelected, setOptionSelected] = useState(null)
+    const [filteredConfs, setFilteredConfs] = useState([])
     const sortOrders = [
-      {name : "Descending", value : "1"},
-      {name : "Ascending", value : "2"},
+      {name : "Newest", value : "1"},
+      {name : "Oldest", value : "2"},
     ];
-    const confsFile = require("./result.txt");
-    fetch(confsFile)
-      .then(response => response.text())
-      .then(text => setConfs([text]));
-
-    const confToggle = React.forwardRef(( {children, onClick}, ref) => (
-      <a
-        href=""
-        ref={ref}
-        onClick={(e) => {
-          e.preventDefault();
-          onClick(e);
-        }}
-      >
-        {children}
-        &#x25bc;
-      </a>
-    ));
-    
-    const confMenu = React.forwardRef(
-      ({children, style, className, "aria-labelledby" : labeledBy}, ref) => {
-        const [value, setValue] = useState("");
-        return (
-          <div
-            ref={ref}
-            style={style}
-            className={className}
-            aria-labelledby={labeledBy}
-          >
-            <Form.Control
-              autoFocus
-              className='mx-3 my-2 w-auto'
-              placeholder='Type to filter..'
-              onChange={(e) => setValue(e.target.value)}
-              value={value}
-            />
-            <ul className='list-unstyled'>
-              {React.Children.toArray(children).filter(
-                (child) =>
-                  !value || child.props.children.toLowerCase().startsWith(value),
-              )}
-            </ul>
-          </div>
-        )
-      }
-    )
 
     useEffect(() => {
         async function getData() {
-            const {data} = await axios.get("/api/articles", {
-              params: {
-                sort_by: sort,
-                order: sortOrder,
-              }
-            });
-            console.log(sort)
-            console.log(sortOrder)
-            // maybe data.data.articles
-            setArticles(data);
+            try {
+              const {data} = await axios.get("/api/articles", {
+                params: {
+                  sort_by: sort,
+                  order: sortOrder,
+                }
+              });
+              setArticles(data);          
+            } catch (err) {
+              console.log(err)
+            }
         }
         getData()
-    }, [sortOrder, sort]);
+    }, [sortOrder, sort]);    
+
+    const getConfsArray = (confDict) => {
+      let confArr = []
+      for (let i in confDict) {
+        confArr.push(confDict[i].value)
+      }
+      return confArr;
+    }
+
+    useEffect(() => {
+      async function getData() {
+        try {
+          const {data} = await axios.post("/api/articles/conf", {
+            body: {
+              confs: getConfsArray(optionSelected)
+            }
+          });
+          setFilteredConfs(data);
+        } catch (err) {
+          console.log("Error", err.message)
+        }
+      }
+      optionSelected ? getData() : setFilteredConfs([])
+    }, [optionSelected])
+
+    const Option = (props) => {
+      return (
+        <div>
+          <components.Option {...props}>
+            <input
+              type="checkbox"
+              checked={props.isSelected}
+              onChange={() => null}
+            />{" "}
+            <label>{props.label}</label>
+          </components.Option>
+        </div>
+      );
+    };
+
+    const handleChange = (selected) => {
+      setOptionSelected(selected);
+    }
     
     return (
         <>
           <Container className="my-5" style={{ maxWidth: '800px' }} >
-            {/* <Image
-              src="fractals_one.png"
-              width="150"
-              style={{ borderRadius: '50%' }}
-              className="d-block mx-auto img-fluid"
-            /> */}
             <Row>
               <Col>
                 <h2 className="text-center">ML articles</h2>
-              </Col>
-              <Col>
-                <Dropdown>
-                  <Dropdown.Toggle variant="warning" id="dropdown-basic">
-                    {`Sort by ${sort}`}
-                  </Dropdown.Toggle>
-                  <DropdownMenu>
-                    <Dropdown.Item onClick={() => setSort("relevancy")}>Relevancy</Dropdown.Item>
-                    <Dropdown.Item onClick={() => setSort("published")}>Published</Dropdown.Item>
-                    <Dropdown.Item onClick={() => setSort("announced")}>Announced</Dropdown.Item>
-                  </DropdownMenu>
-                </Dropdown>
               </Col>
               <Col>
                 <ButtonGroup>
@@ -117,7 +101,7 @@ const Home = () => {
                       key={ind}
                       id={`order-${ind}`}
                       type="radio"
-                      variant={ind % 2 ? "warning" : "secondary"}
+                      variant={ind % 2 ? "info" : "info"}
                       name="Sort Order"
                       value={order.name}
                       checked={sortOrder===order.name}
@@ -129,30 +113,41 @@ const Home = () => {
                 </ButtonGroup>
               </Col>
               <Col>
-                <Dropdown>
-                  <Dropdown.Toggle as={confToggle} id="dropdown-custom-components">
-                    Conference
-                  </Dropdown.Toggle>
-                  <DropdownMenu as={confMenu}>
-                    {confs.map((name) => (
-                      <Dropdown.Item>{name}</Dropdown.Item>
-                    ))}
-                  </DropdownMenu>
-                </Dropdown>
+                <span
+                  className="d-inline-block"
+                  data-toggle="popover"
+                  data-trigger="focus"
+                  data-content="Select conference(s)"
+                >
+                  <ReactSelect
+                    options={confs}
+                    isMulti
+                    closeMenuOnSelect={false}
+                    hideSelectedOptions={false}
+                    components={{
+                      Option
+                    }}
+                    onChange={handleChange}
+                    allowSelectAll={true}
+                    value={optionSelected}
+                  />
+                </span>
               </Col>
             </Row>
           </Container>
           <Container style={{ maxWidth: '800px' }}>
             <ListGroup variant="flush" as="ol">
               {
-                articles.map((article) => {
+                
+                (filteredConfs.length > 0 ? filteredConfs : articles).map((article) => {
                   // Map the articles to JSX
                   return (
                     <ListGroup.Item key={article._id}> 
                       <div className="fw-bold h3">
                         <Link to={`/articles/${article._id}`} style={{ textDecoration: 'none' }}>{article.title}</Link>
                       </div>
-                      <div>{article.author} - <span className="text-secondary">{formatDate(article.published)}</span></div>
+                      {article.conference ? "Presented on " + article.conference : ""}
+                      <div>{article.authors.join(', ')} - <span className="text-secondary">{formatDate(article.published)}</span></div>
                     </ListGroup.Item>
                   );
                 })

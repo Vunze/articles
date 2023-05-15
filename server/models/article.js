@@ -1,14 +1,16 @@
 const mongoose = require("mongoose")
 
 const articleSchema = mongoose.Schema({
-    id: String,
+    id: Object,
+    summary: String,
     published: Date,
     title: String,
     comment: String,
     conference: String,
-    author: String,
-})
+    authors: [String],
+    links: [String],
+});
 
-const articlePost = mongoose.model("Article", articleSchema)
+const articlePost = mongoose.model("Article", articleSchema);
 
 module.exports = articlePost;

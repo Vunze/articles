@@ -6,12 +6,7 @@ const articlePost = require("../models/article")
 const getAllArticles = async (req, res) => {
     try {
         const { sort_by, order } = req.query;
-        if (order === "desc") {
-            order = -1
-        } else {
-            order = 1
-        }
-        const articles = await articlePost.find().sort({sort_by: order});
+        const articles = await articlePost.find().sort({"published": order === "Newest" ? -1 : 1});
         res.status(200).json(articles)
     } catch (err) {
         res.status(400).json({message: err.message})
@@ -20,34 +15,23 @@ const getAllArticles = async (req, res) => {
 
 const findByConference = async (req, res) => {
     try {
-        conf = req.body;
-        const found = await articlePost.find({conference : conf})
+        confs = req.body['body']['confs'];
+        const found = await articlePost.find({conference : confs})
         res.status(200).json(found)
     } catch (err) {
         res.status(400).json({message: err.message})
     }
 }
 
-
-const updateSingleArticle = async (req, res) => {
-    const { id } = req.params;
-    const { link, published, title, comment, conference, author } = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(id))
-        return res.status(404).send(`article ${id} not found`);
-
-    const updatedArticle = {
-        link,
-        published,
-        title,
-        comment,
-        conference,
-        author,
-        _id: id,
-    };
-    await articlePost.findByIdAndUpdate(id, updatedArticle, { new: true });
-    res.json(updatedArticle);
-};
+const findByLink = async(req, res) => {
+    try {
+        link = req.body['body']['link']
+        const found = await articlePost.find({id: link})
+        res.status(200).json(found)
+    } catch (err) {
+        res.status(400).json({message: err.message})
+    }
+}
 
 const findArticle = async (req, res) => {
     const { id } = req.params;
@@ -59,4 +43,4 @@ const findArticle = async (req, res) => {
     res.json(found);
 };
 
-module.exports = {getAllArticles, updateSingleArticle, findArticle, findByConference}
+module.exports = {getAllArticles, findArticle, findByConference, findByLink}

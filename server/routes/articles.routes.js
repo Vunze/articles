@@ -1,11 +1,12 @@
 const express = require('express')
 const router = express.Router()
 
-const {getAllArticles, findArticle, findByConference} = require("../controllers/articles.controller")
+const {getAllArticles, findArticle, findByConference, findByLink} = require("../controllers/articles.controller")
 
 router.get('/', getAllArticles);
 router.get("/:id", findArticle);
-router.get("/conf", findByConference);
+router.post("/conf", findByConference);
+router.get("/link", findByLink);
 
 
 module.exports = router;
