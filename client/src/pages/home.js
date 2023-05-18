@@ -8,24 +8,21 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import axios from "axios";
 import formatDate from '../context/formatDate';
-import DropdownMenu from 'react-bootstrap/esm/DropdownMenu';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import ToggleButton from "react-bootstrap/ToggleButton";
 import { components } from "react-select";
 import { confs } from "../confs.js";
 import { default as ReactSelect } from "react-select";
+import Button from 'react-bootstrap/esm/Button';
 
 
 const Home = () => {
     const [articles, setArticles] = useState([]);
     const [sort, setSort] = useState("published");
-    const [sortOrder, setSortOrder] = useState("Newest");
+    const [sortOrder, setSortOrder] = useState(false);
     const [optionSelected, setOptionSelected] = useState(null)
     const [filteredConfs, setFilteredConfs] = useState([])
-    const sortOrders = [
-      {name : "Newest", value : "1"},
-      {name : "Oldest", value : "2"},
-    ];
 
     useEffect(() => {
         async function getData() {
@@ -36,13 +33,19 @@ const Home = () => {
                   order: sortOrder,
                 }
               });
+              console.log("Done")
               setArticles(data);          
             } catch (err) {
               console.log(err)
             }
         }
+        console.log("Fetching articles")
         getData()
-    }, [sortOrder, sort]);    
+    }, []);
+
+    useEffect(() => {
+      setArticles([...articles].sort((a,b) => a[sort] - b[sort]))
+    }, sort)
 
     const getConfsArray = (confDict) => {
       let confArr = []
@@ -86,6 +89,16 @@ const Home = () => {
     const handleChange = (selected) => {
       setOptionSelected(selected);
     }
+
+    const prettify_sort_option = () => {
+      if (sort === "published") return "publication date"
+      if (sort === "article_rate") return "article rating"
+      if (sort === "author_rate") return "author rating"
+    }
+
+    const handleSortOrderClick = () => {
+      setSortOrder(!sortOrder, articles)
+    }
     
     return (
         <>
@@ -95,22 +108,37 @@ const Home = () => {
                 <h2 className="text-center">ML articles</h2>
               </Col>
               <Col>
-                <ButtonGroup>
+                <DropdownButton
+                  id="dropdown-basic-button"
+                  title={"Sort by " + prettify_sort_option()}
+                  variant="success"
+                >
+                  <Dropdown.Item onClick={()=>setSort("published")}>Publication Date</Dropdown.Item>
+                  <Dropdown.Item>Article Rating</Dropdown.Item>
+                  <Dropdown.Item>Author Rating</Dropdown.Item>
+                </DropdownButton>
+                <Button
+                  variant="success"
+                  onClick={handleSortOrderClick}
+                >
+                  {sortOrder ? "down" : "up"}
+                </Button>
+                {/* <ButtonGroup>                  
                   {sortOrders.map((order, ind) => (
                     <ToggleButton
                       key={ind}
                       id={`order-${ind}`}
                       type="radio"
-                      variant={ind % 2 ? "info" : "info"}
+                      variant={"success"}
                       name="Sort Order"
                       value={order.name}
                       checked={sortOrder===order.name}
-                      onChange={(e) => setSortOrder(e.currentTarget.value)}
+                      onChange={(e) => setSortOrder(!sortOrder)}
                     >
                       {order.name}
                     </ToggleButton>
                   ))}
-                </ButtonGroup>
+                </ButtonGroup> */}
               </Col>
               <Col>
                 <span
@@ -139,7 +167,9 @@ const Home = () => {
             <ListGroup variant="flush" as="ol">
               {
                 
-                (filteredConfs.length > 0 ? filteredConfs : articles).map((article) => {
+                (filteredConfs.length > 0
+                  ? (sortOrder ? filteredConfs : filteredConfs.slice().reverse())
+                  : (sortOrder ? articles : articles.slice().reverse())).map((article) => {
                   // Map the articles to JSX
                   return (
                     <ListGroup.Item key={article._id}> 
