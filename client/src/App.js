@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 
 import Home from './pages/home';
 import Article from './pages/article';
+import ArticleCopy from './pages/articleRef';
 
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
@@ -20,6 +21,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="articles/:id" element={<Article/>} />
+        <Route path="articles/:id/:fromArticle" element={<ArticleCopy/>} />
       </Routes>
     </>
   );

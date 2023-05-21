@@ -15,6 +15,7 @@ import { components } from "react-select";
 import { confs } from "../confs.js";
 import { default as ReactSelect } from "react-select";
 import Button from 'react-bootstrap/esm/Button';
+import DateRangePicker from '@wojtekmaj/react-daterange-picker';
 
 
 const Home = () => {
@@ -23,15 +24,14 @@ const Home = () => {
     const [sortOrder, setSortOrder] = useState(false);
     const [optionSelected, setOptionSelected] = useState(null)
     const [filteredConfs, setFilteredConfs] = useState([])
+    const [searchInput, setSearchInput] = useState("")
+    const [centralityFilter, setCentralityFilter] = useState(0)
+    const [authorFilter, setAuthorFilter] = useState(0)
 
     useEffect(() => {
         async function getData() {
             try {
               const {data} = await axios.get("/api/articles", {
-                params: {
-                  sort_by: sort,
-                  order: sortOrder,
-                }
               });
               console.log("Done")
               setArticles(data);          
@@ -42,10 +42,6 @@ const Home = () => {
         console.log("Fetching articles")
         getData()
     }, []);
-
-    useEffect(() => {
-      setArticles([...articles].sort((a,b) => a[sort] - b[sort]))
-    }, sort)
 
     const getConfsArray = (confDict) => {
       let confArr = []
@@ -90,57 +86,65 @@ const Home = () => {
       setOptionSelected(selected);
     }
 
+    const handleSearch = (e) => {
+      e.preventDefault();
+      setSearchInput(e.target.value)
+    }
+
     const prettify_sort_option = () => {
       if (sort === "published") return "publication date"
-      if (sort === "article_rate") return "article rating"
-      if (sort === "author_rate") return "author rating"
+      if (sort === "articleRating") return "article rating"
+      if (sort === "authorRating") return "author rating"
     }
 
     const handleSortOrderClick = () => {
       setSortOrder(!sortOrder, articles)
+    }
+
+    const sorted_articles = (arts) => {
+      if (sort === "published") {
+        arts = arts.sort((a,b) => new Date(formatDate(a["published"])) - new Date(b["published"]))
+        return sortOrder ? arts : arts.slice().reverse()
+      }
+      return sortOrder ? arts.sort((a,b) => a[sort] - b[sort]) : arts.sort((a,b) => b[sort] - a[sort])
+    }
+
+    const conf_filter = (art) => {
+      console.log(optionSelected)
+      for (var elem in optionSelected) {
+        if (art.conf && art.conf.match(optionSelected[elem]["value"])) {
+          return art
+        }
+      }
+      return null
     }
     
     return (
         <>
           <Container className="my-5" style={{ maxWidth: '800px' }} >
             <Row>
-              <Col>
-                <h2 className="text-center">ML articles</h2>
-              </Col>
+              <h2 className="text-center">ML articles</h2>
+            </Row>
+            <Row>
               <Col>
                 <DropdownButton
                   id="dropdown-basic-button"
                   title={"Sort by " + prettify_sort_option()}
-                  variant="success"
+                  variant="light"
                 >
                   <Dropdown.Item onClick={()=>setSort("published")}>Publication Date</Dropdown.Item>
-                  <Dropdown.Item>Article Rating</Dropdown.Item>
-                  <Dropdown.Item>Author Rating</Dropdown.Item>
+                  <Dropdown.Item onClick={()=>setSort("articleRating")}>Article Rating</Dropdown.Item>
+                  <Dropdown.Item onClick={()=>setSort("authorRating")}>Author Rating</Dropdown.Item>
                 </DropdownButton>
                 <Button
-                  variant="success"
-                  onClick={handleSortOrderClick}
-                >
-                  {sortOrder ? "down" : "up"}
+                    variant="light"
+                    onClick={handleSortOrderClick}
+                  >
+                    {sortOrder ? "↑" : "↓"}
                 </Button>
-                {/* <ButtonGroup>                  
-                  {sortOrders.map((order, ind) => (
-                    <ToggleButton
-                      key={ind}
-                      id={`order-${ind}`}
-                      type="radio"
-                      variant={"success"}
-                      name="Sort Order"
-                      value={order.name}
-                      checked={sortOrder===order.name}
-                      onChange={(e) => setSortOrder(!sortOrder)}
-                    >
-                      {order.name}
-                    </ToggleButton>
-                  ))}
-                </ButtonGroup> */}
               </Col>
               <Col>
+                {"Conference filter "}
                 <span
                   className="d-inline-block"
                   data-toggle="popover"
@@ -162,6 +166,30 @@ const Home = () => {
                 </span>
               </Col>
             </Row>
+            <Row>
+              <Col>
+                <Form.Control
+                  type="number"
+                  placeholder='Minimal article rating'
+                  onChange={(e) => {setCentralityFilter(e.target.value)}}
+                />
+                </Col>
+                <Col>
+                <Form.Control
+                  type="number"
+                  placeholder='Minimal author rating'
+                  onChange={(e) => {setAuthorFilter(e.target.value)}}
+                />
+              </Col>
+            </Row>
+            <Row>
+                <Form.Control
+                  type="text"
+                  placeholder='Search by title'
+                  onChange={handleSearch}
+                  value={searchInput}
+                />
+            </Row>
           </Container>
           <Container style={{ maxWidth: '800px' }}>
             <ListGroup variant="flush" as="ol">
@@ -169,7 +197,10 @@ const Home = () => {
                 
                 (filteredConfs.length > 0
                   ? (sortOrder ? filteredConfs : filteredConfs.slice().reverse())
-                  : (sortOrder ? articles : articles.slice().reverse())).map((article) => {
+                  : (sorted_articles(articles))).filter((article) => {
+                    return article.authorRating >= authorFilter
+                        && article.articleRating >= centralityFilter
+                    }).filter((article) => {return article.title.toLowerCase().match(searchInput.toLowerCase())}).map((article) => {
                   // Map the articles to JSX
                   return (
                     <ListGroup.Item key={article._id}> 
@@ -178,6 +209,8 @@ const Home = () => {
                       </div>
                       {article.conference ? "Presented on " + article.conference : ""}
                       <div>{article.authors.join(', ')} - <span className="text-secondary">{formatDate(article.published)}</span></div>
+                      <div>{"Article rating - " + article.articleRating}</div>
+                      <div>{"Author rating - " + article.authorRating}</div>
                     </ListGroup.Item>
                   );
                 })

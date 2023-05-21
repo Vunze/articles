@@ -5,8 +5,7 @@ const articlePost = require("../models/article")
 
 const getAllArticles = async (req, res) => {
     try {
-        const { sort_by, order } = req.query;
-        const articles = await articlePost.find().sort({"published": order === "Newest" ? -1 : 1});
+        const articles = await articlePost.find().sort();
         res.status(200).json(articles)
     } catch (err) {
         res.status(400).json({message: err.message})

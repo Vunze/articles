@@ -9,6 +9,10 @@ const articleSchema = mongoose.Schema({
     conference: String,
     authors: [String],
     links: [String],
+    citations: [Object],
+    references: [Object],
+    articleRating: Number,
+    authorRating: Number,
 });
 
 const articlePost = mongoose.model("Article", articleSchema);
