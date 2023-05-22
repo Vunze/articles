@@ -4,7 +4,8 @@
   "description": "Arxiv.org articles",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "npm i"
   },
   "keywords": [],
   "author": "Nebroev Kirill",
