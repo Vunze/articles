@@ -88,11 +88,6 @@ const ArticleCopy = () => {
             )
           })}
         </ListGroup>
-        {/* <div className="text-secondary mb-6">{article.links && (not_pdf_links(article.links) ? "Other Links" : "")}</div> */}
-        {/* <div className="text-secondary mb-6">{article.links &&
-                                              not_pdf_links(article.links).map((link) => {
-                                                return <a href={link}>{link}</a>
-                                              })}</div> */}
         <Link to="/" style={{ textDecoration: 'none' }}>Back to Home</Link>
       </Container> : "article not found"}
     </>
