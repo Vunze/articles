@@ -14,7 +14,7 @@ const Article = () => {
   useEffect(() => {
     async function getData() {
       console.log(articleId)
-      const { data } = await axios.get(`/api/articles/${articleId}`);
+      const { data } = await axios.get(`https://ml-articles-server.onrender.com/api/articles/${articleId}`);
       setArticle(data);
     }
     try {
