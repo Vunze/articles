@@ -31,7 +31,7 @@ const Home = () => {
     useEffect(() => {
         async function getData() {
             try {
-              const {data} = await axios.get("/api/articles", {
+              const {data} = await axios.get("https://ml-articles-server.onrender.com/api/articles", {
               });
               console.log("Done")
               setArticles(data);          
@@ -54,7 +54,7 @@ const Home = () => {
     useEffect(() => {
       async function getData() {
         try {
-          const {data} = await axios.post("/api/articles/conf", {
+          const {data} = await axios.post("https://ml-articles-server.onrender.com/api/articles/conf", {
             body: {
               confs: getConfsArray(optionSelected)
             }
