@@ -9,13 +9,10 @@ import Col from "react-bootstrap/Col";
 import axios from "axios";
 import formatDate from '../context/formatDate';
 import DropdownButton from 'react-bootstrap/DropdownButton';
-import ButtonGroup from "react-bootstrap/ButtonGroup";
-import ToggleButton from "react-bootstrap/ToggleButton";
 import { components } from "react-select";
 import { confs } from "../confs.js";
 import { default as ReactSelect } from "react-select";
 import Button from 'react-bootstrap/esm/Button';
-import DateRangePicker from '@wojtekmaj/react-daterange-picker';
 
 
 const Home = () => {
@@ -31,7 +28,7 @@ const Home = () => {
     useEffect(() => {
         async function getData() {
             try {
-              const {data} = await axios.get("/api/articles", {
+              const {data} = await axios.get("https://ml-articles-server.onrender.com/api/articles", {
               });
               console.log("Done")
               setArticles(data);          
@@ -54,7 +51,7 @@ const Home = () => {
     useEffect(() => {
       async function getData() {
         try {
-          const {data} = await axios.post("/api/articles/conf", {
+          const {data} = await axios.post("https://ml-articles-server.onrender.com/api/articles/conf", {
             body: {
               confs: getConfsArray(optionSelected)
             }

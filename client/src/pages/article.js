@@ -2,19 +2,17 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Container from 'react-bootstrap/Container';
-import Button from 'react-bootstrap/Button';
 import formatDate from '../context/formatDate';
 import axios from "axios";
 
 const Article = () => {
   const { id: articleId} = useParams();
   const [article, setArticle] = useState({});
-  const navigate = useNavigate();
 
   useEffect(() => {
     async function getData() {
       console.log(articleId)
-      const { data } = await axios.get(`/api/articles/${articleId}`);
+      const { data } = await axios.get(`https://ml-articles-server.onrender.com/api/articles/${articleId}`);
       setArticle(data);
     }
     try {

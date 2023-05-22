@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Container from 'react-bootstrap/Container';
-import Button from 'react-bootstrap/Button';
 import formatDate from '../context/formatDate';
-import axios from "axios";
 
 const ArticleCopy = () => {
   const { id: articleId, title: flag} = useParams();
