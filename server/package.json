@@ -1,21 +1,15 @@
 {
-  "name": "server",
-  "version": "1.0.0",
-  "description": "Arxiv.org articles",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js",
-    "build": "npm i"
-  },
-  "keywords": [],
-  "author": "Nebroev Kirill",
-  "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.20.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2",
-    "mongoose": "^6.7.5",
-    "nodemon": "^2.0.20"
+    "axios": "^1.4.0",
+    "bootstrap": "^5.3.0",
+    "react-bootstrap": "^2.8.0",
+    "react-bootstrap-navbar": "^1.1.0",
+    "react-router-dom": "^6.14.1",
+    "react-select": "^5.7.3",
+    "reactstrap": "^9.2.0"
+  },
+  "devDependencies": {
+    "@types/bootstrap": "^5.2.6",
+    "@types/react-bootstrap": "^0.32.32"
   }
 }
