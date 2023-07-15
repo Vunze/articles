@@ -1,0 +1,13 @@
+Button.sidebtn {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    opacity: 0;
+    border-radius: 0;
+    transition: 0.6s ease;
+}
+
+Button.sidebtn:hover {
+    opacity: 30%;
+}
