@@ -35,10 +35,6 @@ const Home = () => {
         display: "block",
         margin: "0 auto",
     }
-    const overrideSort: CSSProperties = {
-        display: "flex",
-        flex_direction: "row"
-    }
 
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
