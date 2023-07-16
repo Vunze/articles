@@ -23,8 +23,7 @@ const Article = () => {
   }, [articleId]);
 
   const pdf_link = (links) => {
-    links = links.split(", ")
-    for (let i in links) {
+    for (var i in links) {
       if (links[i].includes("pdf")) {
         return links[i]
       }
@@ -34,8 +33,8 @@ const Article = () => {
   }
 
   const not_pdf_links = (links) => {
-    let links1 = links.split(", ")
-    return links1.filter(a => a !== pdf_link(links))
+    links = links.split(", ")
+    return links.filter(a => a !== pdf_link(links))
   }
 
 
