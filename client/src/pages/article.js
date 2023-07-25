@@ -11,6 +11,7 @@ import Offcanvas from 'react-bootstrap/Offcanvas';
 import Stack from 'react-bootstrap/Stack';
 import Form from "react-bootstrap/Form";
 
+
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
@@ -116,13 +117,13 @@ const Article = () => {
                                   value={searchInput}/>
               <ListGroup style={{overflowY: 'scroll'}}>
                 {article.citations && article.citations.filter((article) => {
-                        return article.title.toLowerCase().match(searchInput.toLowerCase())
+                        return article.paperId && article.title.toLowerCase().match(searchInput.toLowerCase())
                     }).map((citation) => {
                       console.log(citation);
                       return (
                         <ListGroup.Item key={citation.paperId}>
                           <div>
-                            {citation.paperId ? <Link to={`/articles/${citation.paperId}/${citation.title}`} style={{ textDecoration: 'none' }}>{citation.title}</Link> : ""}
+                            {<Link to={`/articles/${citation.paperId}/${citation.title}`} style={{ textDecoration: 'none' }}>{citation.title}</Link>}
                           </div>
                         </ListGroup.Item>
                       )

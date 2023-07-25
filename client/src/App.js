@@ -15,7 +15,6 @@ function App() {
       <Navbar bg="dark" expand="lg" variant="dark">
         <Container>
           <Navbar.Brand href="/">Machine Learning Articles</Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
         </Container>
       </Navbar>
       <Routes>

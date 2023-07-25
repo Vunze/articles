@@ -13,12 +13,17 @@ import { components } from "react-select";
 import { confs } from "../confs.js";
 import { default as ReactSelect } from "react-select";
 import Button from 'react-bootstrap/esm/Button';
+import Stack from 'react-bootstrap/Stack';
 import MoonLoader from "react-spinners/ClipLoader";
+import {FaArrowCircleUp} from 'react-icons/fa';
+import {FiAlertCircle} from "react-icons/fi";
+import Tooltip from 'react-bootstrap/Tooltip';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import "./home.css"
 
 const Home = () => {
     const [articles, setArticles] = useState([])
-    const [sortBy, setSortBy] = useState("published")
+    const [sortBy, setSortBy] = useState("articleRating")
     const [order, setOrder] = useState(true)
     const [selectedConfs, setSelectedConfs] = useState([])
     const [searchInput, setSearchInput] = useState("")
@@ -83,22 +88,12 @@ const Home = () => {
         }
     }, [fetching])
 
-    useEffect(() => {
-        document.addEventListener('scroll', scrollHandler)
-        return function () {
-            document.removeEventListener('scroll', scrollHandler)
-        }
-    }, [])
-
     const scrollHandler = (e) => {
         const docElem = e.target.documentElement
-        if (docElem.scrollTop >= 400) {
+        if (docElem.scrollTop > 300) {
             setShowTopButton(true)
         } else {
             setShowTopButton(false)
-        }
-        if (docElem.scrollHeight - (docElem.scrollTop + window.innerHeight) < 300) {
-            setFetching(true)
         }
     }
 
@@ -149,6 +144,8 @@ const Home = () => {
         })
     }
 
+    window.addEventListener('scroll', scrollHandler);
+
     const Option = (props) => {
         return (
             <div>
@@ -164,47 +161,46 @@ const Home = () => {
         );
     };
 
+    const sortByHandler = () => {
+      if (sortBy === "published") setSortBy("articleRating")
+      if (sortBy === "articleRating") setSortBy("authorRating")
+      if (sortBy === "authorRating") setSortBy("published")
+    }
+
+    const renderTooltipArticle = (props) => (
+      <Tooltip id="article-tooltip" {...props}>
+        Article rating is the sum of citations and references
+      </Tooltip>
+    );
+  
+    const renderTooltipAuthor = (props) => (
+      <Tooltip id="author-tooltip" {...props}>
+        Author rating is the average of H-indices of all authors
+      </Tooltip>
+    );
+
     return (
         <>
-            { showTopButton
-                ? <Button className="sidebtn"
-                          onClick={scrollTop}>
-                    on top ↑
-                </Button>
-                : null
-            }
-            <Container className="my-5" style={{ maxWidth: '800px'}} >
+            <Container className="my-5" style={{maxWidth: "800px"}}>
                 <Row>
                     <Col>
                         <h2 className="text-center">ML articles</h2>
                     </Col>
-                    <div>
-                        <MoonLoader
-                            color={"#61dafb"}
-                            loading={sortLoader}
-                            size={25}
-                            cssOverride={override}
-                            aria-label={"Loading"}
-                            data-testid={"loader"}>
-                        </MoonLoader>
-                    </div>
                 </Row>
                 <Row>
-                    <Col>
-                        <DropdownButton id="dropdown-basic-button"
-                                        title={"Sort by " + prettify_sort_option()}
-                                        variant="light">
-                            <Dropdown.Item onClick={()=>setSortBy("published")}>Publication Date</Dropdown.Item>
-                            <Dropdown.Item onClick={()=>setSortBy("articleRating")}>Article Rating</Dropdown.Item>
-                            <Dropdown.Item onClick={()=>setSortBy("authorRating")}>Author Rating</Dropdown.Item>
-                        </DropdownButton>
-                        <Button variant="light"
-                                onClick={handleOrderClick}>
-                            {order ? "↑" : "↓"}
-                        </Button>
-                    </Col>
-                    <Col>
-                        {"Conference filter "}
+                  <Col md="auto">
+                    <Stack direction='horizontal'>
+                      <Button variant="outline-dark" onClick={sortByHandler}>
+                        {"Sort by " + prettify_sort_option()}
+                      </Button>
+                      <Button variant="outline-dark" onClick={handleOrderClick}>
+                        {order ? "↓" : "↑"}
+                      </Button>
+                    </Stack>
+                  </Col>
+                  <Col/>
+                  <Col md="auto">
+                  {"Conference filter "}
                         <span className="d-inline-block"
                               data-toggle="popover"
                               data-trigger="focus"
@@ -218,25 +214,67 @@ const Home = () => {
                                          allowSelectAll={true}
                                          value={selectedConfs}/>
                         </span>
+                  </Col>
+                </Row>
+                <Row style={{marginTop: 10, alignItems: "center"}}>
+                    <Col md='auto'>
+                        <Form.Control type="number"
+                            placeholder='Minimal article rating'
+                            onChange={(e) => {handleCentralityChange(e.target.value)}}/>                        
+                    </Col>
+                    <Col md="auto">
+                      <OverlayTrigger
+                          placement='right'
+                          delay={{ show: 250, hide: 400 }}
+                          overlay={renderTooltipArticle}
+                      >
+                        <div><FiAlertCircle/></div>
+                      </OverlayTrigger>
+                    </Col>
+                    <Col/>
+                    <Col md="auto">
+                      <OverlayTrigger
+                          placement='left'
+                          delay={{ show: 250, hide: 400 }}
+                          overlay={renderTooltipAuthor}
+                      >
+                        <div><FiAlertCircle/></div>
+                      </OverlayTrigger>
+                    </Col>
+                    <Col md='auto'>
+                      <Form.Control type="number"
+                        placeholder='Minimal author rating'
+                        onChange={(e) => {handleAuthorChange(e.target.value)}}/>
                     </Col>
                 </Row>
-                <Row>
-                    <Col>
-                        <Form.Control type="number"
-                                      placeholder='Minimal article rating'
-                                      onChange={(e) => {handleCentralityChange(e.target.value)}}/>
-                    </Col>
-                    <Col>
-                        <Form.Control type="number"
-                                      placeholder='Minimal author rating'
-                                      onChange={(e) => {handleAuthorChange(e.target.value)}}/>
-                    </Col>
-                </Row>
-                <Row>
-                    <Form.Control type="text"
+                <Row style={{marginTop: 10}}>
+                    {/* <Form.Control type="text"
                                   placeholder='Search by title'
                                   onChange={handleSearch}
-                                  value={searchInput}/>
+                                  value={searchInput}/> */}
+                    <Col>
+                      <Form className="d-flex">
+                        <Form.Control
+                          type="search"
+                          placeholder="Search"
+                          className="me-2"
+                          aria-label="Search"
+                          onChange={handleSearch}
+                        />
+                      </Form>
+                    </Col>
+                </Row>
+                <Row>
+                  <div style={{marginTop: 10}}>
+                      <MoonLoader
+                          color={"#61dafb"}
+                          loading={sortLoader}
+                          size={25}
+                          cssOverride={override}
+                          aria-label={"Loading"}
+                          data-testid={"loader"}>
+                      </MoonLoader>
+                  </div>
                 </Row>
             </Container>
             <Container style={{ maxWidth: '800px' }}>
@@ -270,14 +308,29 @@ const Home = () => {
                         );
                     })}
                 </ListGroup>
-                <MoonLoader
-                    color={"#61dafb"}
-                    loading={fetching}
-                    size={100}
-                    cssOverride={override}
-                    aria-label={"Loading"}
-                    data-testid={"loader"}>
-                </MoonLoader>
+                {!fetching && showTopButton ? 
+                  <Row style={{marginTop: 20}}>
+                    <Col>
+                      <Button variant='light' onClick={()=>setFetching(true)}>
+                        Load More
+                      </Button>
+                    </Col>
+                    <Col></Col>
+                    <Col>
+                    <Button variant="light" size='lg' onClick={scrollTop}>
+                      <FaArrowCircleUp/>
+                    </Button>
+                    </Col>
+                  </Row>
+                  : <MoonLoader
+                        color={"#61dafb"}
+                        loading={fetching}
+                        size={100}
+                        cssOverride={override}
+                        aria-label={"Loading"}
+                        data-testid={"loader"}>
+                    </MoonLoader>
+                }
                 <div style={{color: "white"}}>I'm not letting the page jump</div>
             </Container>
         </>
