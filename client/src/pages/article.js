@@ -82,16 +82,17 @@ const Article = () => {
           <div className="text-secondary mb-1">{article.conference ? "Presented on " + article.conference : ""}</div>
           <div className="text-secondary mb-1">{article.published && formatDate(article.published)}</div>
           <Row>
-            <Col>
+            <Col md="auto">
               <OverlayTrigger
-                placement='left'
+                placement='right'
                 delay={{ show: 250, hide: 400 }}
                 overlay={renderTooltipArticle}
               >
                 <div className="text-secondary mb-4">{"Article rating - " + article.articleRating}</div>
               </OverlayTrigger>
             </Col>
-            <Col>
+            <Col/>
+            <Col md="auto">
               <OverlayTrigger
                 placement='left'
                 delay={{ show: 250, hide: 400 }}
