@@ -14,9 +14,9 @@ from django.db.models import Q
 @api_view(["POST"])
 def articlesList(request):
     params = json.loads(request.body)
-    print(params)
     conf = params["conf"]
     order = params["order"]
+    year = params["year"]
     sort_by = params["sort_by"]
     page = params["curr_page"]
     page_size = params["page_size"]
@@ -27,11 +27,12 @@ def articlesList(request):
         sort_by = "-" + sort_by
     if len(conf) == 0:
         data = Article.objects.filter(articleRating__gte=min_article_rating,
-                                      authorRating__gte=min_author_rating).filter(
+                                      authorRating__gte=min_author_rating,
+                                      published__year__gte=year).filter(
                                       Q(title__icontains=search) | Q(authors__icontains=search))
     else:
         data = Article.objects.filter(conference__in=conf, articleRating__gte=min_article_rating,
-                                      authorRating__gte=min_author_rating).filter(
+                                      authorRating__gte=min_author_rating, published__year__gte=year).filter(
                                       Q(title__icontains=search) | Q(authors__icontains=search))
     data = data.order_by(sort_by)[(page) * page_size:(page+1)*page_size]
     serializer = ArticleSerializer(data, context={'request': request}, many=True)
