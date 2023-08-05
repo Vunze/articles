@@ -24,6 +24,8 @@ import "./home.css"
 const Home = () => {
     const [articles, setArticles] = useState([])
     const [sortBy, setSortBy] = useState("articleRating")
+    const [year, setYear] = useState((new Date()).getFullYear())
+    const [yearState, setYearState] = useState((new Date()).getFullYear())
     const [order, setOrder] = useState(true)
     const [selectedConfs, setSelectedConfs] = useState([])
     const [searchInput, setSearchInput] = useState("")
@@ -49,6 +51,7 @@ const Home = () => {
                     conf: getConfsArray(selectedConfs),
                     sort_by: sortBy,
                     order: order,
+                    year: year,
                     min_article_rating: centralityFilter,
                     min_author_rating: authorFilter,
                     search: searchInput,
@@ -64,7 +67,7 @@ const Home = () => {
 
         return () => clearTimeout(delayDebounceFn)
 
-    }, [sortBy, searchInput, order, authorFilter, centralityFilter, selectedConfs])
+    }, [sortBy, searchInput, order, year, authorFilter, centralityFilter, selectedConfs])
 
     useEffect(() => {
         if (fetching && !lastPageReached) {
@@ -72,6 +75,7 @@ const Home = () => {
                 conf: getConfsArray(selectedConfs),
                 sort_by: sortBy,
                 order: order,
+                year: year,
                 min_article_rating: centralityFilter,
                 min_author_rating: authorFilter,
                 search: searchInput,
@@ -87,6 +91,17 @@ const Home = () => {
             }).finally(() => setFetching(false))
         }
     }, [fetching])
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            if (yearState !== "Custom year") {
+                setYear(yearState)
+            }
+        }, 500)
+
+        return () => clearTimeout(delayDebounceFn)
+
+    }, [yearState])
 
     const scrollHandler = (e) => {
         const docElem = e.target.documentElement
@@ -123,6 +138,13 @@ const Home = () => {
             e = 0;
         }
         setAuthorFilter(e)
+    }
+
+    const handleYearChange = (e) => {
+        if (e === '') {
+            return
+        }
+        setYear(e)
     }
 
     const handleSearch = (e) => {
@@ -165,6 +187,19 @@ const Home = () => {
       if (sortBy === "published") setSortBy("articleRating")
       if (sortBy === "articleRating") setSortBy("authorRating")
       if (sortBy === "authorRating") setSortBy("published")
+    }
+
+    const sortByYearHandler = () => {
+        if (yearState === "Custom year") {
+            setYearState((new Date()).getFullYear())
+            return
+        }
+        let diff = ((new Date()).getFullYear() - yearState)
+        if (diff === 0 || diff === 1) {
+            setYearState(yearState - 1)
+        } else {
+            setYearState("Custom year")
+        }
     }
 
     const renderTooltipArticle = (props) => (
@@ -263,6 +298,20 @@ const Home = () => {
                         />
                       </Form>
                     </Col>
+                </Row>
+                <Row style={{marginTop: 10}}>
+                    <Col md="auto">
+                        <Stack direction='horizontal'>
+                            <Button variant="outline-dark" onClick={sortByYearHandler}>
+                                {(yearState === "Custom year" ? "" : "Since ") + yearState}
+                            </Button>
+                        </Stack>
+                    </Col>
+                    {yearState === "Custom year" ? <Col md='auto'>
+                        <Form.Control type="number"
+                                      placeholder='Choose year'
+                                      onChange={(e) => {handleYearChange(e.target.value)}}/>
+                    </Col> : null}
                 </Row>
                 <Row>
                   <div style={{marginTop: 10}}>
