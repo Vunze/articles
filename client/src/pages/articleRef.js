@@ -109,7 +109,7 @@ const ArticleCopy = () => {
         <h1><a href={link}>{title}</a></h1>
         <div className="text-secondary mb-1">{pubDate && formatDate(pubDate)}</div>
         <Row>
-            <Col>
+            <Col md="auto">
               <OverlayTrigger
                 placement='right'
                 delay={{ show: 250, hide: 400 }}
@@ -119,8 +119,8 @@ const ArticleCopy = () => {
                 <div className="text-secondary mb-4">{"Article rating - " + (degreeCentrality !== Infinity ? degreeCentrality : "")}</div>
               </OverlayTrigger>
             </Col>
-            <Col xs={7}></Col>
-            <Col>
+            <Col/>
+            <Col md="auto">
               <OverlayTrigger
                 placement='left'
                 delay={{ show: 250, hide: 400 }}
