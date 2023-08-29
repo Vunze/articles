@@ -9,6 +9,8 @@ class NIPSParser:
         # self.headers = {
         #         'User-Agent': self.fake_user.chrome
         # }
+        self.ids = []
+        self.ids_to_conf = dict()
         self.result = []
         self.url = ""
         self.conference = ""
@@ -32,17 +34,15 @@ class NIPSParser:
             soup = BeautifulSoup(html, 'lxml')
         except Exception:
             soup = BeautifulSoup(html, 'html.parser')
-        titles = soup.select("a[title='paper title']")  # found under tag <li class="conference">
+        titles = soup.select("h1[class='citation__title']")
         counter = 0
         counter_failed = 0
         for title in titles:
             try:
-                if counter % 250 == 0:
-                    print(f"Article number {counter} titled {title.string}")
                 arxiv_id = self.query_arxiv(title.string)
                 yield {"arxiv_id": arxiv_id,
-                        "title": title.string,  #connectionResetError every article
-                        "conference": self.conference}
+                       "title": title.string,
+                       "conference": self.conference}
             except Exception as e:
                 if counter_failed % 100 == 0:
                     if counter_failed % 1000 == 0:
@@ -51,25 +51,27 @@ class NIPSParser:
                     print(f"The error was {e}")
                 counter_failed += 1
                 yield {"arxiv_id": "",
-                        "title": title.string,
-                        "conference": self.conference}
+                       "title": title.string,
+                       "conference": self.conference}
             counter += 1
         print(f"successfully fetched {counter} papers from {self.conference}")
 
-    def run(self, res_file="NIPS.json", links_file='pages.txt'):
+    def run(self, res_file="NIPS.json", links_file='dois.txt'):
         with open(links_file, 'r') as fin:
-            with open(res_file, "w") as fout:    
+            with open(res_file, "w") as fout:
                 for page in fin:
+                    page = "https://dl.acm.org/doi/" + page
+                    print(page)
                     if page:
                         year = page[page.rfind('/') + 1:]
-                        self.conference = f"NIPS {year}"
+                        self.conference = "NIPS"
                         print(f"working on conference {self.conference}")
                         try:
                             html = self.get_page(page.rstrip('\n'))
                             for res in self.parse_page(html):
                                 self.result.append(res)
-                                # json.dump(res, fout, indent=4)
-                                # NEED to json.dump here (maybe not)
+                                self.ids_to_conf.update({res["arxiv_id"]: self.conference})
+                                self.ids.append(res["arxiv_id"])
                         except Exception:
                             break
 
@@ -78,9 +80,10 @@ class NIPSParser:
                 print(self.result)
                 return
             with open(res_file, 'w') as fout:
-                json.dump(self.result, fout, indent=4)
+                json.dump([self.ids, self.ids_to_conf, self.result], fout, indent=4)
 
 
 if __name__ == '__main__':
     tmp = NIPSParser()
-    print(tmp.run())
+    tmp.run()
+    print(tmp.result)

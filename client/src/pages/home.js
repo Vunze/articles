@@ -47,7 +47,7 @@ const Home = () => {
         const delayDebounceFn = setTimeout(() => {
             if (!fetching) {
                 setSortLoader(true)
-                axios.post("https://meatael.pythonanywhere.com/api/articles/", {
+                axios.post("https://mlarticles.ru/api/articles/", {
                     conf: getConfsArray(selectedConfs),
                     sort_by: sortBy,
                     order: order,
@@ -71,7 +71,7 @@ const Home = () => {
 
     useEffect(() => {
         if (fetching && !lastPageReached) {
-            axios.post("https://meatael.pythonanywhere.com/api/articles/", {
+            axios.post("https://mlarticles.ru/api/articles/", {
                 conf: getConfsArray(selectedConfs),
                 sort_by: sortBy,
                 order: order,

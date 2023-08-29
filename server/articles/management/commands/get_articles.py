@@ -2,6 +2,28 @@ import arxiv
 import json
 
 
+def get_NIPS():
+
+    with open("NIPS.json") as nips:
+        nips_json = json.load(nips)
+
+    search = arxiv.Search(
+        id_list=nips_json[0]
+    )
+
+    articles = []
+
+    for result in search.results():
+
+        if not result.comment:
+            result.comment = ""
+
+        arxiv_id = result.entry_id[21: result.entry_id.find("v", 21)]
+        articles.append([result, nips_json[1][arxiv_id]])
+
+    return articles
+
+
 def get_articles(q="machine learning", max_res=20):
     search = arxiv.Search(
         query=q,
