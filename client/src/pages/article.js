@@ -43,7 +43,7 @@ const Article = () => {
   useEffect(() => {
     async function getData() {
       console.log(articleId)
-      const { data } = await axios.get(`https://meatael.pythonanywhere.com/api/articles/${articleId}`);
+      const { data } = await axios.get(`https://mlarticles.ru/api/articles/${articleId}`);
       console.log(data);
       setArticle(data);
     }
